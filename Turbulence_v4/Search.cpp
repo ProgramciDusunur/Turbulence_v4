@@ -1541,12 +1541,22 @@ static inline int Negamax(Board& board, int depth, int alpha, int beta, bool doN
 			bestMove = ttEntry.bestMove;
 		}
 	}
-	ttEntry.score = bestValue;
-	ttEntry.bound = ttFlag;
-	ttEntry.depth = depth;
-	ttEntry.zobristKey = board.zobristKey;
-	ttEntry.ttPv = tt_pv;
-	ttEntry.bestMove = bestMove;
+    if (ttFlag == ExactFlag || ttEntry.zobristKey != board.zobristKey || depth > ttEntry.depth)
+    {
+        if (!(bestMove == Move(0, 0, 0, 0)) || ttEntry.zobristKey != board.zobristKey ) {
+            ttEntry.bestMove = bestMove;
+        }
+        ttEntry.score = bestValue;
+        ttEntry.bound = ttFlag;
+        ttEntry.depth = depth;
+        ttEntry.zobristKey = board.zobristKey;
+        ttEntry.ttPv = tt_pv;
+
+        if (!isSingularSearch)
+        {
+            TranspositionTable[board.zobristKey % TTSize] = ttEntry;
+        }
+    }
 
 	int bound = bestValue >= beta ? HFLOWER : alpha != orgAlpha ? HFEXACT : HFUPPER;
 	if (!isSingularSearch && !is_in_check(board) && (bestMove == Move(0, 0, 0, 0) || isMoveQuiet(bestMove.Type)) && !(bound == HFLOWER && bestValue <= staticEval) && !(bound == HFUPPER && bestValue >= staticEval))
@@ -1557,10 +1567,7 @@ static inline int Negamax(Board& board, int depth, int alpha, int beta, bool doN
 		updateNonPawnCorrHist(board, depth, bestValue - staticEval, data);
 		updateCounterCorrHist(data.searchStack[data.ply - 1].move, depth, bestValue - staticEval, data);
 	}
-	if (!isSingularSearch)
-	{
-		TranspositionTable[board.zobristKey % TTSize] = ttEntry;
-	}
+
 	return bestValue;
 }
 int get_hashfull()
