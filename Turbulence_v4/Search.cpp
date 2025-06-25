@@ -1542,9 +1542,13 @@ static inline int Negamax(Board& board, int depth, int alpha, int beta, bool doN
 			bestMove = ttEntry.bestMove;
 		}
 	}
+    int adjusted_tt_depth = depth;
+    if (depth >= 5 && ttFlag != HFEXACT) {
+        adjusted_tt_depth--;
+    }
 	ttEntry.score = bestValue;
 	ttEntry.bound = ttFlag;
-	ttEntry.depth = depth;
+	ttEntry.depth = adjusted_tt_depth;
 	ttEntry.zobristKey = board.zobristKey;
 	ttEntry.ttPv = tt_pv;
 	ttEntry.bestMove = bestMove;
