@@ -1542,6 +1542,7 @@ static inline int Negamax(Board& board, int depth, int alpha, int beta, bool doN
 			bestMove = ttEntry.bestMove;
 		}
 	}
+
     int adjusted_tt_depth = depth;
     if (depth >= 5 && ttFlag != HFEXACT) {
         adjusted_tt_depth--;
